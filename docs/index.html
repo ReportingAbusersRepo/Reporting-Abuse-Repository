@@ -107,6 +107,7 @@
                         <h3><i class="fas fa-plus-circle"></i> Add New Report</h3>
                         <form id="addReportForm">
                             <input type="text" id="reportUsername" placeholder="Username (without @)" required class="admin-input">
+                            <input type="url" id="reportRepoUrl" placeholder="Repository URL (e.g., https://github.com/user/repo/issues/1)" class="admin-input">
                             <textarea id="reportReason" placeholder="Reason for report" required class="admin-input" rows="3"></textarea>
                             <div class="form-row">
                                 <label>Status Type:</label>
@@ -130,8 +131,8 @@
                     </div>
                     
                     <div class="admin-section">
-                        <h3><i class="fas fa-edit"></i> Resolve Active Cases</h3>
-                        <div id="activeCasesList"></div>
+                        <h3><i class="fas fa-edit"></i> Manage Reports</h3>
+                        <div id="manageReportsList"></div>
                     </div>
                     
                     <div class="admin-section">

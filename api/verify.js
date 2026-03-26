@@ -2,8 +2,8 @@ export default {
   async fetch(request, env) {
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '86400',
     };
 
@@ -24,6 +24,10 @@ export default {
 
     if (path === '/api/reports/resolve' && request.method === 'PUT') {
       return await resolveReport(request, env, corsHeaders);
+    }
+
+    if (path === '/api/reports' && request.method === 'DELETE') {
+      return await deleteReport(request, env, corsHeaders);
     }
 
     if (path === '/api/verify' && request.method === 'POST') {
@@ -67,7 +71,7 @@ async function addReport(request, env, corsHeaders) {
       });
     }
 
-    const { username, reason, statusType, finalStatus } = await request.json();
+    const { username, reason, repoUrl, statusType, finalStatus } = await request.json();
     
     let reports = await env.REPORTS_KV.get('reports', 'json');
     if (!reports) reports = [];
@@ -81,7 +85,8 @@ async function addReport(request, env, corsHeaders) {
       reportedDate: new Date().toISOString().split('T')[0],
       statusType: statusType || 'underReview',
       finalStatus: finalStatus || null,
-      reason: reason
+      reason: reason,
+      repoUrl: repoUrl || null
     };
 
     reports.push(newReport);
@@ -133,6 +138,44 @@ async function resolveReport(request, env, corsHeaders) {
     });
   } catch (error) {
     return new Response(JSON.stringify({ error: 'Failed to resolve report' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+async function deleteReport(request, env, corsHeaders) {
+  try {
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader || authHeader !== `Bearer ${env.ADMIN_PASSWORD}`) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    const { id } = await request.json();
+    
+    let reports = await env.REPORTS_KV.get('reports', 'json');
+    if (!reports) reports = [];
+
+    const filteredReports = reports.filter(r => r.id !== id);
+    
+    if (filteredReports.length === reports.length) {
+      return new Response(JSON.stringify({ error: 'Report not found' }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    await env.REPORTS_KV.put('reports', JSON.stringify(filteredReports));
+
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: 'Failed to delete report' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });

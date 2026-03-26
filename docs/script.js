@@ -123,6 +123,7 @@ function renderReports(filter = 'all') {
                 <div class="report-info">
                     <div class="report-details">
                         <h4>@${report.username}</h4>
+                        ${report.repoUrl ? `<p><i class="fas fa-link"></i> <a href="${report.repoUrl}" target="_blank" style="color: var(--text-tertiary);">Evidence</a></p>` : ''}
                         <p>Reported: ${displayDate} • ${report.reason}</p>
                     </div>
                 </div>
@@ -132,6 +133,127 @@ function renderReports(filter = 'all') {
             </div>
         `;
     }).join('');
+}
+
+function renderManageReports() {
+    const manageReportsList = document.getElementById('manageReportsList');
+    if (!manageReportsList) return;
+    
+    if (reports.length === 0) {
+        manageReportsList.innerHTML = '<p style="color: var(--text-tertiary);">No reports to manage.</p>';
+        return;
+    }
+    
+    manageReportsList.innerHTML = reports.map(report => {
+        const config = getDisplayStatus(report);
+        return `
+            <div class="manage-report-item" data-id="${report.id}">
+                <div class="manage-report-info">
+                    <h4>@${report.username}</h4>
+                    <p>${report.reason}</p>
+                    ${report.repoUrl ? `<p><i class="fas fa-link"></i> <a href="${report.repoUrl}" target="_blank">Evidence</a></p>` : ''}
+                    <small>Status: ${config.label}</small>
+                </div>
+                <div class="manage-report-actions">
+                    ${report.statusType === "underReview" ? `
+                        <select class="resolve-select-manage" data-id="${report.id}">
+                            <option value="banned">Permanently Banned</option>
+                            <option value="suspended">Suspended</option>
+                            <option value="warning">Warning Issued</option>
+                            <option value="dismissed">Dismissed</option>
+                            <option value="flagged">Flagged</option>
+                        </select>
+                        <button class="resolve-manage-btn" data-id="${report.id}">Resolve</button>
+                    ` : ''}
+                    <button class="delete-report-btn" data-id="${report.id}" style="background: none; border: 1px solid #ef4444; color: #ef4444; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    document.querySelectorAll('.resolve-manage-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const id = parseInt(btn.dataset.id);
+            const select = document.querySelector(`.resolve-select-manage[data-id="${id}"]`);
+            const finalStatus = select.value;
+            await resolveCase(id, finalStatus);
+        });
+    });
+    
+    document.querySelectorAll('.delete-report-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const id = parseInt(btn.dataset.id);
+            if (confirm('Are you sure you want to delete this report?')) {
+                await deleteReport(id);
+            }
+        });
+    });
+}
+
+async function deleteReport(id) {
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+        alert('Session expired. Please login again.');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/api/reports`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ id })
+        });
+
+        if (response.ok) {
+            await loadReportsFromAPI();
+            updateStats();
+            renderReports(document.querySelector('.filter-btn.active')?.dataset.filter || 'all');
+            renderManageReports();
+            renderActiveCases();
+        } else {
+            alert('Failed to delete report.');
+        }
+    } catch (error) {
+        console.error('Failed to delete:', error);
+        alert('Failed to delete report.');
+    }
+}
+
+async function resolveCase(id, finalStatus) {
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+        alert('Session expired. Please login again.');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/api/reports/resolve`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ id, finalStatus })
+        });
+
+        if (response.ok) {
+            await loadReportsFromAPI();
+            updateStats();
+            renderReports(document.querySelector('.filter-btn.active')?.dataset.filter || 'all');
+            renderManageReports();
+            renderActiveCases();
+        } else {
+            alert('Failed to resolve case. Please try again.');
+        }
+    } catch (error) {
+        console.error('Failed to resolve:', error);
+        alert('Failed to resolve case.');
+    }
 }
 
 function renderActiveCases() {
@@ -150,6 +272,7 @@ function renderActiveCases() {
             <div class="active-case-info">
                 <h4>@${report.username}</h4>
                 <p>Reported: ${new Date(report.reportedDate).toLocaleDateString()} • ${report.reason}</p>
+                ${report.repoUrl ? `<p><i class="fas fa-link"></i> <a href="${report.repoUrl}" target="_blank">Evidence</a></p>` : ''}
             </div>
             <div style="display: flex; gap: 0.5rem;">
                 <select class="resolve-select" data-id="${report.id}">
@@ -174,38 +297,7 @@ function renderActiveCases() {
     });
 }
 
-async function resolveCase(id, finalStatus) {
-    const token = localStorage.getItem('adminToken');
-    if (!token) {
-        alert('Session expired. Please login again.');
-        return;
-    }
-
-    try {
-        const response = await fetch(`${API_URL}/api/reports/resolve`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ id, finalStatus })
-        });
-
-        if (response.ok) {
-            await loadReportsFromAPI();
-            updateStats();
-            renderReports(document.querySelector('.filter-btn.active')?.dataset.filter || 'all');
-            renderActiveCases();
-        } else {
-            alert('Failed to resolve case. Please try again.');
-        }
-    } catch (error) {
-        console.error('Failed to resolve:', error);
-        alert('Failed to resolve case.');
-    }
-}
-
-async function addReport(username, reason, statusType, finalStatus = null) {
+async function addReport(username, reason, repoUrl, statusType, finalStatus = null) {
     const token = localStorage.getItem('adminToken');
     if (!token) {
         alert('Session expired. Please login again.');
@@ -219,13 +311,14 @@ async function addReport(username, reason, statusType, finalStatus = null) {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ username, reason, statusType, finalStatus })
+            body: JSON.stringify({ username, reason, repoUrl, statusType, finalStatus })
         });
 
         if (response.ok) {
             await loadReportsFromAPI();
             updateStats();
             renderReports(document.querySelector('.filter-btn.active')?.dataset.filter || 'all');
+            renderManageReports();
             renderActiveCases();
             return true;
         } else {
@@ -280,7 +373,7 @@ async function importData(file) {
                 }
                 
                 for (const report of data.reports) {
-                    await addReport(report.username, report.reason, report.statusType, report.finalStatus);
+                    await addReport(report.username, report.reason, report.repoUrl, report.statusType, report.finalStatus);
                 }
                 alert('Data imported successfully!');
             } else {
@@ -416,6 +509,7 @@ if (loginBtn) {
         if (isValid) {
             adminAuth.style.display = 'none';
             adminPanel.style.display = 'block';
+            renderManageReports();
             renderActiveCases();
         } else {
             loginError.textContent = 'Invalid password or verification failed';
@@ -442,12 +536,13 @@ if (addReportForm) {
     addReportForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = document.getElementById('reportUsername').value;
+        const repoUrl = document.getElementById('reportRepoUrl').value;
         const reason = document.getElementById('reportReason').value;
         const statusType = document.getElementById('reportStatusType').value;
         const finalStatus = statusType === 'resolved' ? document.getElementById('reportFinalStatus').value : null;
         
         if (username && reason) {
-            const success = await addReport(username, reason, statusType, finalStatus);
+            const success = await addReport(username, reason, repoUrl, statusType, finalStatus);
             if (success) {
                 addReportForm.reset();
                 finalStatusGroup.style.display = 'none';
