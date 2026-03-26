@@ -5,8 +5,3 @@ compatibility_date = "2024-01-01"
 kv_namespaces = [
   { binding = "REPORTS_KV", id = "5e03d632764c4e4b888190ad224934a6" }
 ]
-
-[env.production]
-kv_namespaces = [
-  { binding = "REPORTS_KV", id = "5e03d632764c4e4b888190ad224934a6" }
-]
