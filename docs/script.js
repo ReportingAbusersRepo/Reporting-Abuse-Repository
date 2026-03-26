@@ -123,7 +123,7 @@ function renderReports(filter = 'all') {
                 <div class="report-info">
                     <div class="report-details">
                         <h4>@${report.username}</h4>
-                        ${report.repoUrl ? `<p><i class="fas fa-link"></i> <a href="${report.repoUrl}" target="_blank" style="color: var(--text-tertiary);">Evidence</a></p>` : ''}
+                        ${report.repoUrl ? `<p><i class="fas fa-link"></i> <a href="${report.repoUrl}" target="_blank" style="color: var(--text-tertiary); word-break: break-all;">${report.repoUrl}</a></p>` : ''}
                         <p>Reported: ${displayDate} • ${report.reason}</p>
                     </div>
                 </div>
@@ -151,7 +151,7 @@ function renderManageReports() {
                 <div class="manage-report-info">
                     <h4>@${report.username}</h4>
                     <p>${report.reason}</p>
-                    ${report.repoUrl ? `<p><i class="fas fa-link"></i> <a href="${report.repoUrl}" target="_blank">Evidence</a></p>` : ''}
+                    ${report.repoUrl ? `<p><i class="fas fa-link"></i> <a href="${report.repoUrl}" target="_blank" style="color: var(--text-tertiary); word-break: break-all;">${report.repoUrl}</a></p>` : ''}
                     <small>Status: ${config.label}</small>
                 </div>
                 <div class="manage-report-actions">
@@ -165,7 +165,7 @@ function renderManageReports() {
                         </select>
                         <button class="resolve-manage-btn" data-id="${report.id}">Resolve</button>
                     ` : ''}
-                    <button class="delete-report-btn" data-id="${report.id}" style="background: none; border: 1px solid #ef4444; color: #ef4444; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">
+                    <button class="delete-report-btn" data-id="${report.id}">
                         <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
@@ -272,7 +272,7 @@ function renderActiveCases() {
             <div class="active-case-info">
                 <h4>@${report.username}</h4>
                 <p>Reported: ${new Date(report.reportedDate).toLocaleDateString()} • ${report.reason}</p>
-                ${report.repoUrl ? `<p><i class="fas fa-link"></i> <a href="${report.repoUrl}" target="_blank">Evidence</a></p>` : ''}
+                ${report.repoUrl ? `<p><i class="fas fa-link"></i> <a href="${report.repoUrl}" target="_blank" style="color: var(--text-tertiary); word-break: break-all;">${report.repoUrl}</a></p>` : ''}
             </div>
             <div style="display: flex; gap: 0.5rem;">
                 <select class="resolve-select" data-id="${report.id}">

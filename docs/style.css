@@ -239,7 +239,7 @@ header {
 }
 
 .admin-modal {
-    max-width: 700px;
+    max-width: 800px;
 }
 
 .modal-header {
@@ -291,13 +291,21 @@ header {
     border-radius: 50px;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-weight: 500;
 }
 
-.filter-btn:hover,
-.filter-btn.active {
+.filter-btn:hover {
     background: var(--bg-surface);
-    border-color: #fff;
+    border-color: var(--purple);
     color: var(--text-primary);
+    transform: translateY(-2px);
+}
+
+.filter-btn.active {
+    background: var(--purple);
+    border-color: var(--purple);
+    color: var(--text-primary);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
 }
 
 .reports-list {
@@ -320,6 +328,12 @@ header {
     animation: slideIn 0.3s ease;
 }
 
+.report-item:hover {
+    transform: translateX(4px);
+    border-color: var(--border-light);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
 .report-info {
     flex: 1;
 }
@@ -332,6 +346,19 @@ header {
 .report-details p {
     font-size: 0.875rem;
     color: var(--text-tertiary);
+    margin-top: 0.25rem;
+}
+
+.report-details a {
+    color: var(--text-tertiary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+    word-break: break-all;
+}
+
+.report-details a:hover {
+    color: var(--purple);
+    text-decoration: underline;
 }
 
 .report-status {
@@ -423,6 +450,13 @@ textarea.admin-input {
     align-items: center;
     flex-wrap: wrap;
     gap: 1rem;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.active-case-item:hover {
+    border-color: var(--purple);
+    transform: translateX(4px);
 }
 
 .active-case-info h4 {
@@ -432,6 +466,78 @@ textarea.admin-input {
 .active-case-info p {
     font-size: 0.875rem;
     color: var(--text-tertiary);
+    margin-top: 0.25rem;
+}
+
+.active-case-info a {
+    color: var(--text-tertiary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+    word-break: break-all;
+}
+
+.active-case-info a:hover {
+    color: var(--purple);
+    text-decoration: underline;
+}
+
+.manage-report-item {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.manage-report-item:hover {
+    border-color: var(--purple);
+    transform: translateX(4px);
+}
+
+.manage-report-info {
+    flex: 1;
+}
+
+.manage-report-info h4 {
+    margin-bottom: 0.25rem;
+}
+
+.manage-report-info p {
+    font-size: 0.875rem;
+    color: var(--text-tertiary);
+    margin-top: 0.25rem;
+}
+
+.manage-report-info small {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    display: inline-block;
+    margin-top: 0.5rem;
+}
+
+.manage-report-info a {
+    color: var(--text-tertiary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+    word-break: break-all;
+}
+
+.manage-report-info a:hover {
+    color: var(--purple);
+    text-decoration: underline;
+}
+
+.manage-report-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 .resolve-select {
@@ -441,6 +547,25 @@ textarea.admin-input {
     border-radius: 8px;
     color: var(--text-primary);
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.resolve-select:hover {
+    border-color: var(--purple);
+}
+
+.resolve-select-manage {
+    padding: 0.5rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.resolve-select-manage:hover {
+    border-color: var(--purple);
 }
 
 .resolve-btn {
@@ -456,6 +581,39 @@ textarea.admin-input {
 .resolve-btn:hover {
     background: var(--success);
     color: var(--text-primary);
+    transform: translateY(-2px);
+}
+
+.resolve-manage-btn {
+    padding: 0.5rem 1rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--success);
+    color: var(--success);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.resolve-manage-btn:hover {
+    background: var(--success);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+}
+
+.delete-report-btn {
+    background: none;
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.delete-report-btn:hover {
+    background: var(--danger);
+    color: var(--text-primary);
+    transform: translateY(-2px);
 }
 
 .secondary {
@@ -561,6 +719,15 @@ textarea.admin-input {
         display: flex;
         flex-direction: column;
         align-items: center;
+    }
+    
+    .manage-report-item {
+        flex-direction: column;
+    }
+    
+    .manage-report-actions {
+        width: 100%;
+        justify-content: flex-start;
     }
 }
 
