@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abuse Reports Registry | Transparency Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <canvas id="particleCanvas"></canvas>
+    
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+                <h1>Abuse Reports Registry</h1>
+            </div>
+            <p class="tagline">Transparency & Accountability in the Developer Community</p>
+            <div class="stats" id="statsContainer">
+                <div class="stat">
+                    <span class="stat-number" id="activeReportsCount">0</span>
+                    <span class="stat-label">Active Reports</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="resolvedReportsCount">0</span>
+                    <span class="stat-label">Resolved</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="totalReportsCount">0</span>
+                    <span class="stat-label">Total Reports</span>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="hero">
+                <h2>Tracking Community Safety</h2>
+                <p>This registry maintains verified records of users reported for policy violations. All cases follow GitHub's official reporting process.</p>
+                <button id="openModalBtn" class="cta-button">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    View Reported Users
+                </button>
+                <button id="openAdminBtn" class="cta-button admin-btn">
+                    <i class="fas fa-lock"></i>
+                    Admin Dashboard
+                </button>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <i class="fas fa-gavel"></i>
+                    <h3>Due Process</h3>
+                    <p>All reports are verified through GitHub's official channels before being recorded.</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Pattern Recognition</h3>
+                    <p>Identifying repeat offenders helps protect the wider community.</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-handshake"></i>
+                    <h3>Community Driven</h3>
+                    <p>Maintained by developers committed to platform safety and ethics.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-list"></i> Reported Users Registry</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="report-filters">
+                    <button class="filter-btn active" data-filter="all">All Reports</button>
+                    <button class="filter-btn" data-filter="active">Active</button>
+                    <button class="filter-btn" data-filter="resolved">Resolved</button>
+                </div>
+                <div class="reports-list" id="reportsList"></div>
+            </div>
+            <div class="modal-footer">
+                <p><i class="fas fa-info-circle"></i> Active cases are under review. Final status appears after resolution.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="adminModal" class="modal">
+        <div class="modal-content admin-modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-lock"></i> Admin Dashboard</h2>
+                <button class="close-btn admin-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="admin-auth" id="adminAuth">
+                    <h3>Authentication Required</h3>
+                    <input type="password" id="adminPassword" placeholder="Enter admin password" class="admin-input">
+                    <div id="turnstileContainer" style="margin: 1rem 0;"></div>
+                    <button id="loginBtn" class="cta-button">Login</button>
+                    <p class="error-message" id="loginError"></p>
+                </div>
+                <div id="adminPanel" style="display: none;">
+                    <div class="admin-section">
+                        <h3><i class="fas fa-plus-circle"></i> Add New Report</h3>
+                        <form id="addReportForm">
+                            <input type="text" id="reportUsername" placeholder="Username (without @)" required class="admin-input">
+                            <textarea id="reportReason" placeholder="Reason for report" required class="admin-input" rows="3"></textarea>
+                            <div class="form-row">
+                                <label>Status Type:</label>
+                                <select id="reportStatusType" class="admin-input">
+                                    <option value="underReview">Under Review (Active)</option>
+                                    <option value="resolved">Resolved - Choose final status</option>
+                                </select>
+                            </div>
+                            <div id="finalStatusGroup" style="display: none;">
+                                <label>Final Status:</label>
+                                <select id="reportFinalStatus" class="admin-input">
+                                    <option value="banned">Permanently Banned</option>
+                                    <option value="suspended">Suspended</option>
+                                    <option value="warning">Warning Issued</option>
+                                    <option value="dismissed">Dismissed</option>
+                                    <option value="flagged">Flagged</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="cta-button">Add Report</button>
+                        </form>
+                    </div>
+                    
+                    <div class="admin-section">
+                        <h3><i class="fas fa-edit"></i> Resolve Active Cases</h3>
+                        <div id="activeCasesList"></div>
+                    </div>
+                    
+                    <div class="admin-section">
+                        <h3><i class="fas fa-database"></i> Export Data</h3>
+                        <button id="exportDataBtn" class="cta-button secondary">Export as JSON</button>
+                        <button id="importDataBtn" class="cta-button secondary">Import from JSON</button>
+                        <input type="file" id="importFile" accept=".json" style="display: none;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script src="script.js"></script>
+</body>
+</html>
